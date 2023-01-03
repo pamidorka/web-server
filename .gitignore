@@ -1,0 +1,13 @@
+
+# objects
+
+*.o
+*.a
+*.d
+
+# exe
+
+main
+kernel
+
+*.e
