@@ -1,7 +1,8 @@
 
 #include "headers/http.h"
-#include "headers/catcher.h"
 #include "headers/analyzer.h"
+
+#include <unistd.h>
 
 pthread_mutex_t catcher_mutex;
 
@@ -30,8 +31,6 @@ void http_catcher(SERV* server) {
         }
 
         close(new_user->sock);
-
-        http_log(new_user, "the user get data from server");
 
         free(new_user);
     }
