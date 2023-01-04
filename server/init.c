@@ -1,5 +1,4 @@
 
-#include "headers/init.h"
 #include "headers/http.h"
 
 SERV* http_server_init(
