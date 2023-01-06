@@ -4,15 +4,14 @@
 
 #include <string.h>
 
-struct user_call {
+static struct user_call {
     char* method;
     char* file_name;
     char* http_v;
 };
 
-static inline struct user_call* parse_hdr(char* hdr) {
-    struct user_call* call = malloc(sizeof(struct user_call));
-
+static int parse_hdr(char* restrict hdr, struct user_call* restrict call) {
+    
     char* curr_str = strtok(hdr, " ");
 
     call->method = malloc(sizeof(char) * strlen(curr_str));
@@ -29,32 +28,49 @@ static inline struct user_call* parse_hdr(char* hdr) {
     call->http_v = malloc(sizeof(char) * strlen(curr_str));
     strcpy(call->http_v, curr_str);
 
-    return call;
+    return 0;
 }
 
-static inline CLB* create_callback(struct user_call* call) {
+static CLB* create_callback(const struct user_call* call) {
     CLB* clb = malloc(sizeof(CLB));
 
-    clb->hdr_size = sizeof(STD_HDR);
+    clb->hdr_size = sizeof(STD_HDR) - 1;
+
+    clb->file = fopen(call->file_name, "r");
+
+    if (!clb->file) {
+        http_error("file was null (not found)");
+        free(clb);
+        return NULL;
+    }
 
     if (strstr(call->file_name, HTML)) {
 
-        clb->hdr_size += sizeof(CONTENT_TYPE " " TEXT HTML TWO_NEW_LINE);
-
-        clb->file = fopen(call->file_name, "r");
+        clb->hdr_size += sizeof(CONTENT_TYPE " " TEXT HTML TWO_NEW_LINE) - 1;
 
         clb->http_hdr = malloc(sizeof(char) * clb->hdr_size);
 
         strcpy(clb->http_hdr, STD_HDR);
         strcat(clb->http_hdr, CONTENT_TYPE " " TEXT HTML TWO_NEW_LINE);
     }
-    else {
-        free(clb);
-        clb = NULL;
-    }
+    else if (strstr(call->file_name, CSS)) {
+        clb->hdr_size += sizeof(CONTENT_TYPE " " TEXT CSS TWO_NEW_LINE) - 1;
 
-    if (!clb->file) {
-        http_error("file was null (not found)");
+        clb->http_hdr = malloc(sizeof(char) * clb->hdr_size);
+
+        strcpy(clb->http_hdr, STD_HDR);
+        strcat(clb->http_hdr, CONTENT_TYPE " " TEXT CSS TWO_NEW_LINE);
+    }
+    else if (strstr(call->file_name, ICO)) {
+        clb->hdr_size += sizeof(CONTENT_TYPE " " IMAGE ICO TWO_NEW_LINE) - 1;
+
+        clb->http_hdr = malloc(sizeof(char) * clb->hdr_size);
+
+        strcpy(clb->http_hdr, STD_HDR);
+        strcat(clb->http_hdr, CONTENT_TYPE " " IMAGE ICO TWO_NEW_LINE);
+    }
+    else {
+        fclose(clb->file);
         free(clb);
         clb = NULL;
     }
@@ -74,18 +90,13 @@ int http_analyzer(USR* client) {
     char buf[READER_BUF];
     fgets(buf, READER_BUF, client_stream);
     
-    struct user_call* u_call = parse_hdr(buf);
+    struct user_call u_call;
+    
+    parse_hdr(buf, &u_call);
 
-    if (!u_call) {
-        http_error("user call was null");
-        return 1;
-    }
+    http_log_va(client, "the client ask for this data %s", u_call.file_name);
 
-    http_log_va(client, "the client ask for this data %s", u_call->file_name);
-
-    CLB* clb = create_callback(u_call);
-
-    free(u_call);
+    CLB* clb = create_callback(&u_call);
 
     if (!clb) {
         http_error("callback was null");

@@ -5,12 +5,12 @@ src = $(notdir $(wildcard ./server/*.c))
 hdr = $(wildcard ./server/headers/*.h)
 obj = $(src:.c=.o)
 
-compile = 
+compile = -g
 
 vpath %.c server
 
 kernel: $(obj) $(hdr)
-	$(cc) $(addprefix ./server/obj/, $(obj)) -o ./server/bin/$@.e
+	$(cc) $(compile) $(addprefix ./server/obj/, $(obj)) -o ./server/bin/$@.e
 
 %.o: %.c
 	$(cc) -c $(compile) $< -o ./server/obj/$@
