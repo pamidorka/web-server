@@ -12,7 +12,8 @@
 
 #ifdef ERROR 
 #define http_error(str) \
-    printf( \
+    fprintf( \
+        stdout, \
         "ERROR: "str"\n" \
         "  in %s():%d\n", \
         __func__, \
@@ -69,14 +70,17 @@ http_log(user, event)
 #define OK                      "OK"
 #define CONTENT_TYPE            "Content-type:"
 #define TEXT                    "text/"
+#define IMAGE                   "image/"
 #define HTML                    "html"
+#define CSS                     "css"
+#define ICO                     "ico"
 #define NEW_LINE                "\n"
 
 #define TWO_NEW_LINE            NEW_LINE \
                                 NEW_LINE
 
-#define STD_HDR                 HTTP_V" " \
-                                STATUS_CODE_SUCCSESS" " \
+#define STD_HDR                 HTTP_V " " \
+                                STATUS_CODE_SUCCSESS " " \
                                 OK \
                                 NEW_LINE
 

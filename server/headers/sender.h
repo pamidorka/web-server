@@ -1,2 +1,2 @@
 
-int http_sender(USR* client, CLB* callback);
+int http_sender(USR* restrict client, CLB* restrict callback);
